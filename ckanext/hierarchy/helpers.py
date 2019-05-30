@@ -1,6 +1,10 @@
 import ckan.plugins as p
 import ckan.model as model
 from ckan.common import request
+from ckan.lib.base import h
+
+import logging
+log = logging.getLogger(__name__)
 
 def group_tree(organizations=[], type_='organization'):
     full_tree_list = p.toolkit.get_action('group_tree')({}, {'type': type_})
@@ -90,3 +94,27 @@ def is_include_children_selected(fields):
         include_children_selected = True
     return include_children_selected
 
+
+def group_depth(group_id):
+    depth = 0
+    group = group_tree_section(group_id, include_siblings=False)
+    if group['highlighted'] == True:
+        return depth
+    else:    
+        while group['children']:
+            if group['highlighted'] == True:
+                return depth
+            else:
+                depth += 1
+                group = group['children'][0]
+    return depth            
+
+
+def available_orgs_names():
+    available_orgs = h.organizations_available('create_dataset')
+    org_names = []
+    for org in available_orgs:
+        org_names.append(org['name'])
+    
+    return org_names
+    

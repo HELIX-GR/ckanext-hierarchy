@@ -22,7 +22,7 @@ ul.hierarchy-tree li {
 }
 
 ul.hierarchy-tree li:last-child {
-    background: #fff url(images/lastnode.png) no-repeat;
+    background: #f1f1f1 url(images/lastnode.png) no-repeat;
 }
 
 ul.hierarchy-tree-top li a, ul.hierarchy-tree li a{

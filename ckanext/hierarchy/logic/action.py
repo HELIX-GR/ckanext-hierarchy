@@ -65,9 +65,9 @@ def _nest_group_tree_list(group_tree_list, group_tree_leaf):
     '''
     root_node = None
     last_node = None
-    log.debug(group_tree_list)
+    #log.debug(group_tree_list)
     for group in group_tree_list:
-        log.debug(group)
+        #log.debug(group)
         node = GroupTreeNode(
          {'id': group.id,
           'name': group.name,
@@ -106,3 +106,4 @@ def _group_tree_branch(root_group, highlight_group_name=None, type='group'):
             node.highlight()
         nodes[group_id] = node
     return root_node
+
