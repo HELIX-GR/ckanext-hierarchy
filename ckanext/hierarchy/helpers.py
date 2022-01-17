@@ -115,7 +115,6 @@ def available_orgs_names():
         org_names.append(org['name'])
     
     return org_names
-    
 
 
 def render_tree():
@@ -137,7 +136,7 @@ def _render_tree(top_nodes):
     return html + '</ul>'
 
 def _render_tree_node(node):
-    html = '<a href="/publisher/%s">%s</a>' % (node['name'], node['title'])
+    html = '<a href="/organization/%s">%s</a>' % (node['name'], node['title'])
     if node['highlighted']:
         html = '<strong>%s</strong>' % html
     if node['children']:
