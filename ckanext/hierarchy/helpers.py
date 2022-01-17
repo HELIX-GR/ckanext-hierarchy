@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 def group_tree(organizations=[], type_='organization'):
     full_tree_list = p.toolkit.get_action('group_tree')({}, {'type': type_})
-
     if not organizations:
         return full_tree_list
     else:
@@ -72,7 +71,6 @@ def group_tree_highlight(organizations, group_tree_list):
             traverse_highlight(child, name_list)
 
     selected_names = [ o.get('name',None) for o in organizations]
-    print(selected_names)
 
     for group in group_tree_list:
         traverse_highlight(group, selected_names)
@@ -118,3 +116,34 @@ def available_orgs_names():
     
     return org_names
     
+
+
+def render_tree():
+    '''Returns HTML for a hierarchy of all publishers'''
+    from ckan.logic import get_action
+    from ckan import model
+    context = {'model': model, 'session': model.Session}
+    top_nodes = get_action('group_tree')(context=context,
+            data_dict={'type': 'organization'})
+    return _render_tree(top_nodes)
+
+def _render_tree(top_nodes):
+    '''Renders a tree of nodes. 10x faster than Jinja/organization_tree.html
+    Note: avoids the slow url_for routine.
+    '''
+    html = '<ul>'
+    for node in top_nodes:
+        html += _render_tree_node(node)
+    return html + '</ul>'
+
+def _render_tree_node(node):
+    html = '<a href="/publisher/%s">%s</a>' % (node['name'], node['title'])
+    if node['highlighted']:
+        html = '<strong>%s</strong>' % html
+    if node['children']:
+        html += '<ul>'
+        for child in node['children']:
+            html += _render_tree_node(child)
+        html += '</ul>'
+    html = '<li id="node_%s">%s</li>' % (node['name'], html)
+    return html
