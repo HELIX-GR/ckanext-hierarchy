@@ -2,6 +2,7 @@ import ckan.plugins as p
 import ckan.model as model
 from ckan.common import request
 from ckan.lib.base import h
+import ckan.plugins.toolkit as toolkit
 
 import logging
 log = logging.getLogger(__name__)
@@ -76,14 +77,17 @@ def group_tree_highlight(organizations, group_tree_list):
         traverse_highlight(group, selected_names)
     return group_tree_list
 
-def get_allowable_parent_groups(group_id):
+def get_allowable_parent_groups(user, group_id):
+    allowable_parent_groups = toolkit.get_action(u'organization_list_for_user')(
+            {u'user': user}, {u'permission': u'admin'})
+    # exclude groups that could create a loop
     if group_id:
         group = model.Group.get(group_id)
-        allowable_parent_groups = \
-            group.groups_allowed_to_be_its_parent(type='organization')
-    else:
-        allowable_parent_groups = model.Group.all(
-            group_type='organization')
+        allowable_unloopable_groups = group.groups_allowed_to_be_its_parent(type='organization')
+        allowable_group_names = [group.name for group in allowable_unloopable_groups]
+        return [group for group in allowable_parent_groups
+                if group.get('name') in allowable_group_names]
+
     return allowable_parent_groups
 
 def is_include_children_selected(fields):
