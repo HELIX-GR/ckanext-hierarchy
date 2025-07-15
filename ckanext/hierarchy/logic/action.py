@@ -19,6 +19,12 @@ def group_tree(context, data_dict):
     return [_group_tree_branch(group, type=group_type)
             for group in model.Group.get_top_level_groups(type=group_type)]
 
+def str_to_bool(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.lower() in ('true', '1', 'yes')
+    return bool(value)
 
 @logic.side_effect_free
 def group_tree_section(context, data_dict):
@@ -42,8 +48,8 @@ def group_tree_section(context, data_dict):
         raise p.toolkit.ValidationError(
             'Group type is "%s" not "%s" that %s' %
             (group.type, group_type, how_type_was_set))
-    include_parents = context.get('include_parents', True)
-    include_siblings = context.get('include_siblings', True)
+    include_parents = str_to_bool(data_dict.get('include_parents', True))
+    include_siblings = str_to_bool(data_dict.get('include_siblings', True))
     if include_parents:
         root_group = (group.get_parent_group_hierarchy(type=group_type) or [group])[0]
     else:
