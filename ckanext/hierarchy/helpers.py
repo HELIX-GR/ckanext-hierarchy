@@ -130,15 +130,6 @@ def render_tree():
             data_dict={'type': 'organization'})
     return _render_tree(top_nodes)
 
-# def _render_tree(top_nodes):
-#     '''Renders a tree of nodes. 10x faster than Jinja/organization_tree.html
-#     Note: avoids the slow url_for routine.
-#     '''
-#     html = '<ul>'
-#     for node in top_nodes:
-#         html += _render_tree_node(node)
-#     return html + '</ul>'
-
 def _render_tree(top_nodes):
     html = '<ul class="org-tree">'
     for node in top_nodes:
@@ -147,12 +138,15 @@ def _render_tree(top_nodes):
     return html
 
 def _render_collapsible_node(node):
+    has_children = node.get("children") and len(node["children"]) > 0
+    toggle_btn = f'<button class="toggle-btn" data-org="{node["name"]}">+</button>' if has_children else ""
+
     html = f'''
     <li class="dataset-item" id="node_{node['name']}" style="list-style: none;">
       <div class="row dataset-content">
         <div class="col-12 col-md-6">
           <div class="d-flex align-items-center gap-2 node">
-            <button class="toggle-btn" data-org="{node['name']}">+</button>
+            {toggle_btn}
             <h3 class="organization-heading m-0">
               <a href="/organization/{node['name']}">{node['title']}</a>
             </h3>
@@ -164,11 +158,12 @@ def _render_collapsible_node(node):
     '''
     return html
 
+
 def _render_tree_node(node):
     html = '<a href="/organization/%s">%s</a>' % (node['name'], node['title'])
-    if node['highlighted']:
+    if node.get('highlighted'):
         html = '<strong>%s</strong>' % html
-    if node['children']:
+    if node.get("children"):
         html += '<ul>'
         for child in node['children']:
             html += _render_tree_node(child)
