@@ -121,14 +121,21 @@ def available_orgs_names():
     return org_names
 
 
-def render_tree():
-    '''Returns HTML for a hierarchy of all publishers'''
-    from ckan.logic import get_action
-    from ckan import model
-    context = {'model': model, 'session': model.Session}
-    top_nodes = get_action('group_tree')(context=context,
-            data_dict={'type': 'organization'})
-    return _render_tree(top_nodes)
+# def render_tree():
+#     '''Returns HTML for a hierarchy of all publishers'''
+#     from ckan.logic import get_action
+#     from ckan import model
+#     context = {'model': model, 'session': model.Session}
+#     top_nodes = get_action('group_tree')(context=context,
+#             data_dict={'type': 'organization'})
+#     return _render_tree(top_nodes)
+
+def render_tree(top_nodes):
+    html = '<ul class="org-tree">'
+    for node in top_nodes:
+        html += _render_collapsible_node(node)
+    html += '</ul>'
+    return html
 
 def _render_tree(top_nodes):
     html = '<ul class="org-tree">'
