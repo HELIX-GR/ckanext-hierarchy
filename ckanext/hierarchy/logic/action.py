@@ -3,6 +3,8 @@ import logging
 import ckan.plugins as p
 import ckan.logic as logic
 from ckanext.hierarchy.model import GroupTreeNode
+from ckan.model import Session
+from ckan.model import GroupExtra
 
 log = logging.getLogger(__name__)
 _get_or_bust = logic.get_or_bust
@@ -94,22 +96,50 @@ def _group_tree_branch(root_group, highlight_group_name=None, type='group'):
     :param highlight_group_name: group name that is to be flagged 'highlighted'
     :returns: the top GroupTreeNode of the tree
     '''
-    nodes = {}  # group_id: GroupTreeNode()
-    root_node = nodes[root_group.id] = GroupTreeNode(
-        {'id': root_group.id,
-         'name': root_group.name,
-         'title': root_group.title})
+    nodes = {}
+
+    # collect all ids in this branch
+    group_rows = list(root_group.get_children_group_hierarchy(type=type))
+    group_ids = [root_group.id] + [r[0] for r in group_rows]
+
+    # one query for all greek titles
+    greek_map = _greek_titles_by_group_id(group_ids)
+
+    root_node = nodes[root_group.id] = GroupTreeNode({
+        'id': root_group.id,
+        'name': root_group.name,
+        'title': root_group.title,
+        'title_greek': greek_map.get(root_group.id)
+    })
+
     if root_group.name == highlight_group_name:
         nodes[root_group.id].highlight()
         highlight_group_name = None
-    for group_id, group_name, group_title, parent_id in \
-            root_group.get_children_group_hierarchy(type=type):
-        node = GroupTreeNode({'id': group_id,
-                              'name': group_name,
-                              'title': group_title})
+
+    for group_id, group_name, group_title, parent_id in group_rows:
+        node = GroupTreeNode({
+            'id': group_id,
+            'name': group_name,
+            'title': group_title,
+            'title_greek': greek_map.get(group_id)
+        })
         nodes[parent_id].add_child_node(node)
+
         if highlight_group_name and group_name == highlight_group_name:
             node.highlight()
+
         nodes[group_id] = node
+
     return root_node
+
+def _greek_titles_by_group_id(group_ids):
+    """Return {group_id: title_greek} for the given group_ids."""
+    if not group_ids:
+        return {}
+
+    rows = (Session.query(GroupExtra.group_id, GroupExtra.value)
+            .filter(GroupExtra.group_id.in_(group_ids))
+            .filter(GroupExtra.key == 'title_greek')
+            .all())
+    return {gid: val for gid, val in rows}
 
