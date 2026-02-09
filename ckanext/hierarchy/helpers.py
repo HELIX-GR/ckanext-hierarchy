@@ -153,7 +153,7 @@ def _render_collapsible_node(node):
       <div class="row dataset-content">
         <div class="col-12 col-md-6">
           <div class="d-flex align-items-center gap-2 node">
-            {toggle_btn}
+            
             <h3 class="organization-heading m-0">
               <a href="/organization/{node['name']}">{node['title']}</a>
             </h3>
