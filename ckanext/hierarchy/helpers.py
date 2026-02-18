@@ -2,6 +2,7 @@ import ckan.plugins as p
 import ckan.model as model
 from ckan.common import request
 from ckan.lib.base import h
+from ckan.lib.helpers import lang
 import ckan.plugins.toolkit as toolkit
 
 import logging
@@ -145,8 +146,11 @@ def _render_tree(top_nodes):
     return html
 
 def _render_collapsible_node(node):
+    
     has_children = node.get("children") and len(node["children"]) > 0
     toggle_btn = f'<button class="toggle-btn" data-org="{node["name"]}">+</button>' if has_children else ""
+
+    title = _get_org_title(node)
 
     html = f'''
     <li class="dataset-item" id="node_{node['name']}" style="list-style: none;">
@@ -155,7 +159,7 @@ def _render_collapsible_node(node):
           <div class="d-flex align-items-center gap-2 node">
             
             <h3 class="organization-heading m-0">
-              <a href="/organization/{node['name']}">{node['title']}</a>
+              <a href="/organization/{node['name']}">{title}</a>
             </h3>
           </div>
           <ul class="children ps-4" id="children_{node['name']}" style="display:none;"></ul>
@@ -177,3 +181,11 @@ def _render_tree_node(node):
         html += '</ul>'
     html = '<li id="node_%s">%s</li>' % (node['name'], html)
     return html
+
+def _get_org_title(node):
+    current_lang = lang()
+
+    if current_lang == "el" and node.get("title_greek"):
+        return node["title_greek"]
+
+    return node.get("title") or node.get("name")
