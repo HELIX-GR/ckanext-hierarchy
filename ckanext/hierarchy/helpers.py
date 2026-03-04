@@ -151,7 +151,11 @@ def _render_collapsible_node(node):
     toggle_btn = f'<button class="toggle-btn" data-org="{node["name"]}">+</button>' if has_children else ""
 
     title = _get_org_title(node)
+    current_lang = lang()
+    lang_prefix = f"/{current_lang}" if current_lang else ""
 
+    org_url = f"{lang_prefix}/organization/{node['name']}"
+    
     html = f'''
     <li class="dataset-item" id="node_{node['name']}" style="list-style: none;">
       <div class="row dataset-content">
@@ -159,7 +163,7 @@ def _render_collapsible_node(node):
           <div class="d-flex align-items-center gap-2 node">
             
             <h3 class="organization-heading m-0">
-              <a href="/organization/{node['name']}">{title}</a>
+              <a href="{org_url}">{title}</a>
             </h3>
           </div>
           <ul class="children ps-4" id="children_{node['name']}" style="display:none;"></ul>
